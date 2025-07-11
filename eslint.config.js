@@ -5,5 +5,6 @@ export default antfu(
   {
     type: 'lib',
     pnpm: true,
+    stylistic: true,
   },
 )

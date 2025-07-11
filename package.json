@@ -1,61 +1,31 @@
 {
-  "name": "cloudflare-mcp-hub",
-  "type": "module",
-  "version": "0.0.0",
-  "packageManager": "pnpm@10.12.1",
-  "description": "Central MCP server running on Cloudflare's new container service.",
-  "author": "Adam Paterson <hello@adampaterson.co.uk>",
-  "license": "MIT",
-  "funding": "https://github.com/sponsors/adam-paterson",
-  "homepage": "https://github.com/adam-paterson/cloudflare-mcp-hub#readme",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/adam-paterson/cloudflare-mcp-hub.git"
-  },
-  "bugs": "https://github.com/adam-paterson/cloudflare-mcp-hub/issues",
-  "keywords": [],
-  "sideEffects": false,
-  "exports": {
-    ".": "./dist/index.mjs",
-    "./package.json": "./package.json"
-  },
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
-  "files": [
-    "dist"
-  ],
+  "name": "@adam-paterson/cf-graphiti-mcp-worker",
+  "version": "0.1.0",
+  "description": "Cloudflare Container Worker proxy for the Graphiti MCP server",
   "scripts": {
-    "build": "unbuild",
-    "dev": "unbuild --stub",
-    "lint": "eslint",
-    "prepublishOnly": "nr build",
-    "release": "bumpp && pnpm publish",
-    "start": "tsx src/index.ts",
-    "test": "vitest",
-    "typecheck": "tsc --noEmit",
-    "prepare": "simple-git-hooks"
+    "dev": "wrangler dev",
+    "lint": "eslint .",
+    "types": "wrangler types"
+  },
+  "dependencies": {
+    "@cloudflare/containers": "catalog:",
+    "dev": "catalog:",
+    "hono": "catalog:",
+    "vitest": "catalog:dev"
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:cli",
     "@antfu/ni": "catalog:cli",
-    "@antfu/utils": "catalog:inlined",
     "@types/node": "catalog:types",
-    "bumpp": "catalog:cli",
     "eslint": "catalog:cli",
     "lint-staged": "catalog:cli",
     "simple-git-hooks": "catalog:cli",
-    "tinyexec": "catalog:utils",
-    "tsx": "catalog:cli",
     "typescript": "catalog:cli",
-    "unbuild": "catalog:cli",
     "vite": "catalog:cli",
-    "vitest": "catalog:testing",
-    "vitest-package-exports": "catalog:testing",
-    "yaml": "catalog:testing"
+    "wrangler": "catalog:"
   },
   "simple-git-hooks": {
-    "pre-commit": "pnpm i --frozen-lockfile --ignore-scripts --offline && npx lint-staged"
+    "pre-commit": "npx lint-staged"
   },
   "lint-staged": {
     "*": "eslint --fix"
