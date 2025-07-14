@@ -2,6 +2,8 @@
 
 [![License][license-src]][license-href]
 
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https%3A%2F%2Fgithub.com%2Fadam-paterson%2Fcloudflare-grafitti-mcp-server)
+
 A Cloudflare Container Worker that serves as a proxy for the Graphiti MCP (Model Context Protocol) server, providing scalable, serverless access to AI agent memory capabilities through Neo4j-backed knowledge graphs.
 
 ## Overview
@@ -19,18 +21,43 @@ Graphiti Cloud bridges the gap between AI applications and persistent memory by 
 
 ## Architecture
 
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   AI Client     │───▶│  Graphiti Cloud  │───▶│  Graphiti MCP   │
-│   Application   │    │  Worker Proxy    │    │   Container     │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                                │                        │
-                                ▼                        ▼
-                       ┌──────────────────┐    ┌─────────────────┐
-                       │   Cloudflare     │    │     Neo4j       │
-                       │   Infrastructure │    │   Knowledge     │
-                       └──────────────────┘    │     Graph       │
-                                               └─────────────────┘
+```mermaid
+graph TB
+    Cursor[Cursor IDE] --> Worker[Graphiti Cloud Worker]
+    Claude[Claude Desktop] --> Worker
+    MCPClient[Other MCP Clients] --> Worker
+
+    Worker --> Container[Graphiti MCP Container]
+    Container --> Neo4j[(Neo4j Knowledge Graph)]
+    Container --> OpenAI[OpenAI API]
+
+    Worker -.-> CF[Cloudflare Infrastructure]
+    Container -.-> CF
+
+    subgraph "MCP-Enabled Clients"
+        Cursor
+        Claude
+        MCPClient
+    end
+
+    subgraph "Cloudflare Edge"
+        Worker
+        Container
+        CF
+    end
+
+    subgraph "External Services"
+        Neo4j
+        OpenAI
+    end
+
+    style Cursor fill:#007ACC,stroke:#333,stroke-width:2px
+    style Claude fill:#FF6B35,stroke:#333,stroke-width:2px
+    style MCPClient fill:#9C27B0,stroke:#333,stroke-width:2px
+    style Worker fill:#f96,stroke:#333,stroke-width:2px
+    style Container fill:#69f,stroke:#333,stroke-width:2px
+    style Neo4j fill:#4CAF50,stroke:#333,stroke-width:2px
+    style OpenAI fill:#FF9800,stroke:#333,stroke-width:2px
 ```
 
 ## Quick Start
@@ -40,8 +67,27 @@ Graphiti Cloud bridges the gap between AI applications and persistent memory by 
 - [Node.js](https://nodejs.org/) (v18 or later)
 - [pnpm](https://pnpm.io/) package manager
 - [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/)
-- Neo4j database instance
-- OpenAI API key
+- [Neo4j database instance](#neo4j-setup)
+- [OpenAI API key](https://platform.openai.com/api-keys)
+
+### Neo4j Setup
+
+You'll need a Neo4j database to store the knowledge graph. Here are your options:
+
+1. **Neo4j AuraDB (Recommended)** - Fully managed cloud service
+   - Sign up at [Neo4j AuraDB](https://neo4j.com/cloud/platform/aura-graph-database/)
+   - Create a free instance (up to 200k nodes and 400k relationships)
+   - Get your connection URI, username, and password
+
+2. **Self-hosted Neo4j**
+   - [Download Neo4j Community Edition](https://neo4j.com/download/)
+   - Follow the [installation guide](https://neo4j.com/docs/operations-manual/current/installation/)
+
+3. **Neo4j Desktop**
+   - [Download Neo4j Desktop](https://neo4j.com/download/)
+   - Create a local database for development
+
+> **Learn more about Neo4j**: Neo4j is a graph database that stores data as nodes and relationships, making it perfect for knowledge graphs. Check out the [Neo4j Graph Database Concepts](https://neo4j.com/docs/getting-started/current/graphdb-concepts/) guide.
 
 ### Installation
 
@@ -56,13 +102,24 @@ cd graphiti-cloud
 pnpm install
 ```
 
-3. Configure environment variables in `.dev.vars`:
+3. **For Development**: Configure environment variables in `.dev.vars`:
 ```bash
 NEO4J_URI=neo4j://your-neo4j-instance:7687
 NEO4J_USER=your-username
 NEO4J_PASSWORD=your-password
 OPENAI_API_KEY=your-openai-api-key
 ```
+
+4. **For Production**: Add secrets to your Cloudflare Worker:
+```bash
+# Add each secret using wrangler
+wrangler secret put NEO4J_URI
+wrangler secret put NEO4J_USER
+wrangler secret put NEO4J_PASSWORD
+wrangler secret put OPENAI_API_KEY
+```
+
+> **Learn more**: See the [Cloudflare Workers Secrets documentation](https://developers.cloudflare.com/workers/configuration/secrets/) for detailed instructions on managing secrets.
 
 ### Development
 
@@ -72,6 +129,25 @@ pnpm dev
 ```
 
 The worker will be available at `http://localhost:8787`
+
+#### Debugging with MCP Inspector
+
+For debugging the MCP protocol communication, you can use the official MCP Inspector:
+
+```bash
+# Install the MCP Inspector globally
+npm install -g @modelcontextprotocol/inspector
+
+# Start the inspector pointing to your local worker
+mcp-inspector http://localhost:8787
+```
+
+This will open a web interface where you can:
+- Send MCP protocol requests
+- View request/response payloads
+- Debug the communication between your client and the Graphiti MCP server
+
+> **Learn more**: Check out the [MCP Inspector documentation](https://modelcontextprotocol.io/docs/tools/inspector) for advanced debugging techniques.
 
 ### Deployment
 
@@ -94,12 +170,12 @@ The `GraphitiMCPContainer` class extends Cloudflare's Container with these confi
 
 ### Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `NEO4J_URI` | Neo4j database connection string |
-| `NEO4J_USER` | Neo4j username |
-| `NEO4J_PASSWORD` | Neo4j password |
-| `OPENAI_API_KEY` | OpenAI API key for AI functionality |
+| Variable | Description | Required | Example |
+|----------|-------------|----------|---------|
+| `NEO4J_URI` | Neo4j database connection string | | `neo4j://localhost:7687` or `neo4j+s://xxx.databases.neo4j.io` |
+| `NEO4J_USER` | Neo4j username | | `neo4j` |
+| `NEO4J_PASSWORD` | Neo4j password | | `your-secure-password` |
+| `OPENAI_API_KEY` | OpenAI API key for AI functionality | | `sk-...` |
 
 ## Usage
 
@@ -177,6 +253,7 @@ Currently, Cloudflare's test suite doesn't fully support containers. Integration
 - [Graphiti](https://github.com/getzep/graphiti) - The underlying MCP server for knowledge graphs
 - [Model Context Protocol](https://modelcontextprotocol.io/) - The protocol specification
 - [Cloudflare Containers](https://developers.cloudflare.com/containers/) - Cloudflare's container service
+- [Neo4j](https://neo4j.com/) - The graph database powering the knowledge storage
 
 ## License
 
@@ -184,7 +261,7 @@ Currently, Cloudflare's test suite doesn't fully support containers. Integration
 
 ## Support
 
-- Email: [your-email@example.com]
+- Email: [hello@adampaterson.co.uk]
 - Issues: [GitHub Issues](https://github.com/adam-paterson/graphiti-cloud/issues)
 - Discussions: [GitHub Discussions](https://github.com/adam-paterson/graphiti-cloud/discussions)
 
