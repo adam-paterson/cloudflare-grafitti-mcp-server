@@ -5,23 +5,26 @@
   "scripts": {
     "dev": "wrangler dev",
     "lint": "eslint .",
-    "types": "wrangler types"
+    "types": "wrangler types",
+    "test": "vitest"
   },
   "dependencies": {
     "@cloudflare/containers": "catalog:",
     "dev": "catalog:",
-    "hono": "catalog:",
-    "vitest": "catalog:dev"
+    "hono": "catalog:"
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:cli",
     "@antfu/ni": "catalog:cli",
+    "@cloudflare/vitest-pool-workers": "catalog:testing",
     "@types/node": "catalog:types",
     "eslint": "catalog:cli",
+    "jiti": "catalog:types",
     "lint-staged": "catalog:cli",
     "simple-git-hooks": "catalog:cli",
     "typescript": "catalog:cli",
     "vite": "catalog:cli",
+    "vitest": "catalog:testing",
     "wrangler": "catalog:"
   },
   "simple-git-hooks": {

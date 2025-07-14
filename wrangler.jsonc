@@ -10,15 +10,15 @@
   "containers": [
     {
       "class_name": "GraphitiMCPContainer",
-      "max_instances": 40,
-      "image": "./Dockerfile",
-      "name": "graphiti-mcp"
+      "max_instances": 5,
+      "image": "registry.cloudflare.com/80c97ef9e846015e10e78d69082b8a08/knowledge-graph-mcp:0.4.0",
+      "name": "knowledge-graph-mcp"
     }
   ],
   "durable_objects": {
     "bindings": [
       {
-        "name": "GRAPHITI_MCP_CONTAINER",
+        "name": "KNOWLEDGE_GRAPH_MCP_CONTAINER",
         "class_name": "GraphitiMCPContainer"
       }
     ]
