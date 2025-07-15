@@ -1,6 +1,7 @@
 {
   "name": "@adam-paterson/cf-graphiti-mcp-worker",
   "version": "0.1.0",
+  "packageManager": "pnpm@10.12.4",
   "description": "Cloudflare Container Worker proxy for the Graphiti MCP server",
   "scripts": {
     "dev": "wrangler dev",
