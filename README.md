@@ -1,5 +1,6 @@
-# Graphiti Cloud
+# Graphiti Cloud via Cloudflare Workers
 
+[![GitHub Actions Workflow Status][workflow-src]][workflow-href]
 [![License][license-src]][license-href]
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https%3A%2F%2Fgithub.com%2Fadam-paterson%2Fcloudflare-grafitti-mcp-server)
@@ -294,5 +295,7 @@ Currently, Cloudflare's test suite doesn't fully support containers. Integration
 </p>
 
 <!-- Badges -->
-[license-src]: https://img.shields.io/github/license/adam-paterson/graphiti-cloud.svg?style=flat&colorA=080f12&colorB=1fa669
-[license-href]: https://github.com/adam-paterson/graphiti-cloud/blob/main/LICENSE.md
+[workflow-src]: https://img.shields.io/github/actions/workflow/status/adam-paterson/cloudflare-grafitti-mcp-server/ci.yml?style=for-the-badge
+[workflow-href]: https://github.com/adam-paterson/cloudflare-grafitti-mcp-server/actions/workflows/ci.yml
+[license-src]: https://img.shields.io/github/license/adam-paterson/cloudflare-grafitti-mcp-server.svg?style=for-the-badge&colorA=080f12&colorB=1fa669
+[license-href]: https://github.com/adam-paterson/cloudflare-grafitti-mcp-server/blob/main/LICENSE.md
