@@ -1,10 +1,15 @@
-import { defineConfig } from 'vitest/config'
+import { defineWorkersProject } from '@cloudflare/vitest-pool-workers/config'
 
-export default defineConfig({
+export default defineWorkersProject({
   test: {
+    testTimeout: 15_000,
+    name: 'graphiti-mcp-worker',
     poolOptions: {
       workers: {
-        wrangler: { configPth: './wrangler.jsonc' },
+        singleWorker: true,
+        wrangler: {
+          configPath: './wrangler.jsonc',
+        },
       },
     },
   },
