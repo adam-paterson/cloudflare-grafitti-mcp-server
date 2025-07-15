@@ -1,6 +1,7 @@
 import { Container, getContainer, getRandom } from '@cloudflare/containers'
 import { env } from 'cloudflare:workers'
 import { Hono } from 'hono'
+import { bearerAuth } from 'hono/bearer-auth'
 
 const app = new Hono<{ Bindings: Env }>()
 
@@ -21,8 +22,10 @@ export class GraphitiMCPContainer extends Container {
   }
 }
 
+// Basic auth middleware
+app.use('*', bearerAuth({ token: env.BEARER_TOKEN }))
+
 app.all('*', async (context) => {
-  // API: check for required env variables
   const container = getContainer(context.env.KNOWLEDGE_GRAPH_MCP_CONTAINER)
   const response = await container.fetch(context.req.raw)
   return response

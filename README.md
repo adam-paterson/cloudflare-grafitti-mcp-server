@@ -10,6 +10,8 @@ A Cloudflare Container Worker that serves as a proxy for the Graphiti MCP (Model
 
 Graphiti Cloud bridges the gap between AI applications and persistent memory by leveraging Cloudflare's new container service to host and proxy requests to a Graphiti MCP server. This enables AI agents to maintain context and memory across interactions using a powerful knowledge graph backend.
 
+![Graph Database Visualization](docs/graph-db.png)
+
 ## Features
 
 - **Serverless Architecture**: Built on Cloudflare Workers with container support
@@ -22,42 +24,52 @@ Graphiti Cloud bridges the gap between AI applications and persistent memory by 
 ## Architecture
 
 ```mermaid
-graph TB
-    Cursor[Cursor IDE] --> Worker[Graphiti Cloud Worker]
-    Claude[Claude Desktop] --> Worker
-    MCPClient[Other MCP Clients] --> Worker
-
-    Worker --> Container[Graphiti MCP Container]
-    Container --> Neo4j[(Neo4j Knowledge Graph)]
-    Container --> OpenAI[OpenAI API]
-
-    Worker -.-> CF[Cloudflare Infrastructure]
+---
+config:
+  theme: neutral
+  look: handDrawn
+  layout: dagre
+---
+flowchart TB
+ subgraph subGraph0["MCP-Enabled Clients"]
+        Cursor["Cursor IDE"]
+        Claude["Claude Desktop"]
+        MCPClient["Other MCP Clients"]
+  end
+ subgraph subGraph1["Cloudflare Edge"]
+        Worker["Graphiti Cloud Worker"]
+        Container["Graphiti MCP Container"]
+        CF["Cloudflare Infrastructure"]
+  end
+ subgraph subGraph2["External Services"]
+        Neo4j[("Neo4j Knowledge Graph")]
+        OpenAI["OpenAI API"]
+  end
+    Cursor --> Worker
+    Claude --> Worker
+    MCPClient --> Worker
+    Worker --> Container
+    Container --> Neo4j & OpenAI
+    Worker -.-> CF
     Container -.-> CF
-
-    subgraph "MCP-Enabled Clients"
-        Cursor
-        Claude
-        MCPClient
-    end
-
-    subgraph "Cloudflare Edge"
-        Worker
-        Container
-        CF
-    end
-
-    subgraph "External Services"
-        Neo4j
-        OpenAI
-    end
-
-    style Cursor fill:#007ACC,stroke:#333,stroke-width:2px
-    style Claude fill:#FF6B35,stroke:#333,stroke-width:2px
-    style MCPClient fill:#9C27B0,stroke:#333,stroke-width:2px
-    style Worker fill:#f96,stroke:#333,stroke-width:2px
-    style Container fill:#69f,stroke:#333,stroke-width:2px
-    style Neo4j fill:#4CAF50,stroke:#333,stroke-width:2px
-    style OpenAI fill:#FF9800,stroke:#333,stroke-width:2px
+     Cursor:::Aqua
+     Cursor:::Ash
+     Claude:::Pine
+     Claude:::Peach
+     Claude:::Ash
+     MCPClient:::Rose
+     MCPClient:::Ash
+     Worker:::Sky
+     Container:::Sky
+     CF:::Peach
+     Neo4j:::Sky
+     OpenAI:::Aqua
+    classDef Pine stroke-width:1px, stroke-dasharray:none, stroke:#254336, fill:#27654A, color:#FFFFFF
+    classDef Ash stroke-width:1px, stroke-dasharray:none, stroke:#999999, fill:#EEEEEE, color:#000000
+    classDef Rose stroke-width:1px, stroke-dasharray:none, stroke:#FF5978, fill:#FFDFE5, color:#8E2236
+    classDef Peach stroke-width:1px, stroke-dasharray:none, stroke:#FBB35A, fill:#FFEFDB, color:#8F632D
+    classDef Sky stroke-width:1px, stroke-dasharray:none, stroke:#374D7C, fill:#E2EBFF, color:#374D7C
+    classDef Aqua stroke-width:1px, stroke-dasharray:none, stroke:#46EDC8, fill:#DEFFF8, color:#378E7A
 ```
 
 ## Quick Start
@@ -92,31 +104,37 @@ You'll need a Neo4j database to store the knowledge graph. Here are your options
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/adam-paterson/graphiti-cloud.git
 cd graphiti-cloud
 ```
 
 2. Install dependencies:
+
 ```bash
 pnpm install
 ```
 
 3. **For Development**: Configure environment variables in `.dev.vars`:
+
 ```bash
 NEO4J_URI=neo4j://your-neo4j-instance:7687
 NEO4J_USER=your-username
 NEO4J_PASSWORD=your-password
 OPENAI_API_KEY=your-openai-api-key
+BEARER_TOKEN=your-secure-bearer-token
 ```
 
 4. **For Production**: Add secrets to your Cloudflare Worker:
+
 ```bash
 # Add each secret using wrangler
 wrangler secret put NEO4J_URI
 wrangler secret put NEO4J_USER
 wrangler secret put NEO4J_PASSWORD
 wrangler secret put OPENAI_API_KEY
+wrangler secret put BEARER_TOKEN
 ```
 
 > **Learn more**: See the [Cloudflare Workers Secrets documentation](https://developers.cloudflare.com/workers/configuration/secrets/) for detailed instructions on managing secrets.
@@ -124,6 +142,7 @@ wrangler secret put OPENAI_API_KEY
 ### Development
 
 Start the development server:
+
 ```bash
 pnpm dev
 ```
@@ -143,6 +162,7 @@ mcp-inspector http://localhost:8787
 ```
 
 This will open a web interface where you can:
+
 - Send MCP protocol requests
 - View request/response payloads
 - Debug the communication between your client and the Graphiti MCP server
@@ -152,6 +172,7 @@ This will open a web interface where you can:
 ### Deployment
 
 Deploy to Cloudflare:
+
 ```bash
 wrangler deploy
 ```
@@ -176,6 +197,7 @@ The `GraphitiMCPContainer` class extends Cloudflare's Container with these confi
 | `NEO4J_USER` | Neo4j username | | `neo4j` |
 | `NEO4J_PASSWORD` | Neo4j password | | `your-secure-password` |
 | `OPENAI_API_KEY` | OpenAI API key for AI functionality | | `sk-...` |
+| `BEARER_TOKEN` | Bearer token for authentication | | `your-secure-bearer-token` |
 
 ## Usage
 
